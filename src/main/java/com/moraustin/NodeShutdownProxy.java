@@ -1,12 +1,10 @@
 package com.moraustin;
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.fluent.Request;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
-import org.apache.http.client.HttpClient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +21,9 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
 
     public NodeShutdownProxy(RegistrationRequest request, Registry registry) throws IOException {
         super(request, registry);
-        System.out.println("New proxy instantiated for the machine :" + getRemoteHost().getHost());
+        System.out.printf("New proxy instantiated for %s\n", getRemoteHost().getHost());
+        System.out.printf("Attaching node %s\n", this.getId());
+        System.out.printf("Remote host is %s\n", this.getRemoteHost());
         InputStream stream = NodeShutdownProxy.class.getResourceAsStream(NodeShutdownProxy.class.getSimpleName() + ".properties");
         Properties props = new Properties();
         props.load(stream);
@@ -50,21 +50,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             super.beforeSession(session);
             return;
         }
-        System.out.println("Cannot forward any more tests to this proxy " + ip);
-    }
-
-    /**
-     * Invoke this method to decide if the node has reached its max. test execution value and if the node should be
-     * picked up for recycling.
-     *
-     * @return - <code>true</code> if the node can be released and shutdown as well.
-     */
-    public synchronized boolean shouldNodeBeReleased() {
-        if (this.counter == 0) {
-            System.out.println("The node " + getRemoteHost().getHost() + "can be released now");
-            return true;
-        }
-        return false;
+        System.out.printf("Cannot forward any more tests to %s\n", ip);
     }
 
     private synchronized boolean decrementedCounterIsNotZero() {
@@ -73,6 +59,20 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         }
         --this.counter;
         return true;
+    }
+
+    private synchronized boolean canReleaseNode() {
+        final String ip = this.getRemoteHost().getHost();
+        if (this.isBusy()) {
+            System.out.printf("%s is busy and cannot be released\n", ip);
+            return false;
+        }
+        if (this.counter == 0) {
+            System.out.printf("%s has no sessions remaining and can be released\n", ip);
+            return true;
+        }
+        System.out.printf("%s has %d sessions remaining and will not be released\n", ip, counter);
+        return false;
     }
 
     /**
@@ -89,11 +89,10 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         @Override
         public void run() {
             while (true) {
-                boolean isBusy = proxy.isBusy();
-                boolean canRelease = proxy.shouldNodeBeReleased();
-                if (!isBusy && canRelease) {
+                if (proxy.canReleaseNode()) {
                     proxy.getRegistry().removeIfPresent(proxy);
-                    System.out.println(proxy.getRemoteHost().getHost() + " has been released successfully from the hub");
+                    System.out.printf("%s has been released successfully from the hub\n",
+                            proxy.getRemoteHost().getHost());
                     shutdownNode();
                     return;
                 }
@@ -106,16 +105,15 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         }
 
         private void shutdownNode() {
-            HttpClient client = new DefaultHttpClient();
-            HttpPost post = new HttpPost("http://" + proxy.getRemoteHost().getHost() +
-                    ":" + proxy.getRemoteHost().getPort() + "/extra/" +
-                    NodeShutdownServlet.class.getSimpleName());
             try {
-                client.execute(post);
+                Request.Post("http://" + proxy.getRemoteHost().getHost() +
+                        ":" + proxy.getRemoteHost().getPort() + "/extra/" +
+                        NodeShutdownServlet.class.getSimpleName()).execute();
             } catch (IOException e) {
                 log.log(Level.SEVERE, e.getMessage(), e);
+                return;
             }
-            System.out.println("Node " + proxy.getRemoteHost().getHost() + " shut-down successfully.");
+            System.out.printf("Node %s has shut down successfully\n", proxy.getRemoteHost().getHost());
         }
     }
 }
