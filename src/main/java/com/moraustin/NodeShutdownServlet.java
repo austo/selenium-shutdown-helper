@@ -1,11 +1,12 @@
 package com.moraustin;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A simple servlet which basically issues a System.exit() when invoked.
@@ -13,7 +14,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class NodeShutdownServlet extends HttpServlet {
 
-    @Override
+    private static final Logger logger = Logger.getLogger(NodeShutdownServlet.class.getName());
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // TODO: get status of node
         super.doGet(req, resp);
@@ -21,12 +23,25 @@ public class NodeShutdownServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        shutdownNode();
+        logger.info("received shutdown request");
+        resp.setStatus(200);
+        resp.setContentType("application/json");
+        resp.getWriter().print("{ \"message\": \"shutting down\" }");
+        new Terminator().start();
+        logger.info("shutdown thread launched");
     }
 
-    protected void shutdownNode() {
-        System.out.println("Shutting down the node");
-        // TODO: check for API/SPI for selenium node shutdown
-        System.exit(0);
+    static class Terminator extends Thread {
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(Constants.NODE_SHUTDOWN_INTERVAL); // shutdown after response is sent
+                logger.warning("Shutting down the node's JVM");
+                System.exit(0);
+            } catch (InterruptedException e) {
+                logger.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
     }
 }
