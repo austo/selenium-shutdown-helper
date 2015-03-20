@@ -5,11 +5,9 @@ import org.openqa.grid.common.exception.RemoteUnregisterException;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
+import sun.jvm.hotspot.debugger.win32.coff.COFFLineNumber;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
@@ -28,9 +26,8 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         logger.info("New proxy instantiated for " + getRemoteHost().getHost());
         logger.info("Attaching node " + this.getId());
         logger.info("Remote host is " + this.getRemoteHost());
-        InputStream stream = NodeShutdownProxy.class.getResourceAsStream(NodeShutdownProxy.class.getSimpleName() + ".properties");
-        Properties props = new Properties();
-        props.load(stream);
+
+        Properties props = getProxyProperties();
         counter = Integer.parseInt((String) props.get(Constants.UNIQUE_SESSION_COUNT));
     }
 
@@ -77,6 +74,27 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         }
         logger.info(ip + " has " + counter + " sessions remaining and will not be released");
         return false;
+    }
+
+    static Properties getProxyProperties() throws IOException {
+        Properties props = new Properties();
+        String propertiesFilePath = System.getProperty(Constants.PROXY_PROPERTIES_PATH);
+
+        if (propertiesFilePath == null) {
+            String propFileName = NodeShutdownProxy.class.getSimpleName() + ".properties";
+            logger.info(String.format("System property \"%s\" is not set. Reading properties file from %s",
+                    Constants.PROXY_PROPERTIES_PATH, propFileName));
+            InputStream stream = NodeShutdownProxy.class.getResourceAsStream(propFileName);
+            props.load(stream);
+            stream.close();
+            return props;
+        }
+        logger.info("Reading properties file from " + propertiesFilePath);
+        File propFile = new File(propertiesFilePath);
+        FileInputStream stream = new FileInputStream(propFile);
+        props.load(stream);
+        stream.close();
+        return props;
     }
 
     /**
