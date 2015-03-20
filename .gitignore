@@ -6,3 +6,5 @@ build/
 *.iws
 .gradle/
 SeleniumShutdownHelper*.jar
+*.log
+run.pid
