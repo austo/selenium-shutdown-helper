@@ -19,7 +19,7 @@ trap kill_node TERM INT
 cd bin
 
 while ${SHOULD_RUN}; do
-    java -cp *:. ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
-    wait
-    sleep ${SLEEP_INTERVAL}
+  java -cp *:. ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
+  wait
+  sleep ${SLEEP_INTERVAL}
 done
