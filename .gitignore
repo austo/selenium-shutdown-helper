@@ -1,11 +1,11 @@
-.idea/
 .DS_Store
+.gradle/
+.idea/
 build/
+bin/
 *.iml
 *.ipr
 *.iws
-.gradle/
-SeleniumShutdownHelper*.jar
 *.log
-run.pid
 *.tar
+*.pid

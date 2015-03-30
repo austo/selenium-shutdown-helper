@@ -5,7 +5,6 @@ import org.openqa.grid.common.exception.RemoteUnregisterException;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
-import sun.jvm.hotspot.debugger.win32.coff.COFFLineNumber;
 
 import java.io.*;
 import java.net.HttpURLConnection;
