@@ -8,3 +8,4 @@ build/
 SeleniumShutdownHelper*.jar
 *.log
 run.pid
+*.tar
