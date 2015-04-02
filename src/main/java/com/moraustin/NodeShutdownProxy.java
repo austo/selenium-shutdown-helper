@@ -129,6 +129,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             try {
                 URL shutdownUrl = new URL(String.format(
                         "%s/extra/%s", proxy.getRemoteHost(), NodeShutdownServlet.class.getSimpleName()));
+                logger.info(String.format("sending shutdown request to %s", shutdownUrl));
                 HttpURLConnection connection = (HttpURLConnection) shutdownUrl.openConnection();
                 connection.setRequestMethod("POST");
                 int responseCode = connection.getResponseCode();

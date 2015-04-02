@@ -20,6 +20,12 @@ task copyJar(type: Copy) {
     dependsOn('build')
 }
 
+task copyJarToDockerTests(type: Copy) {
+    from "bin/${jar.archiveName}"
+    into('../selenium-docker-tests')
+    dependsOn('copyJar')
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile "org.seleniumhq.selenium:selenium-java:2.45.0"

@@ -1,10 +1,9 @@
 {
-  "capabilities": [
-    {
-      "browserName": "firefox",
-      "maxInstances": 5
-    }
-  ],
+  "capabilities": [{
+    "browserName": "firefox",
+    "maxInstances": 5,
+    "seleniumProtocol": "WebDriver"
+  }],
   "configuration": {
     "proxy": "com.moraustin.NodeShutdownProxy",
     "maxSession": 5,
