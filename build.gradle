@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 version = '1.0'
 
 repositories {
@@ -26,8 +27,14 @@ task copyJarToDockerTests(type: Copy) {
     dependsOn('copyJar')
 }
 
+def seleniumVersion = '2.45.0'
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile "org.seleniumhq.selenium:selenium-java:2.45.0"
-    compile "org.seleniumhq.selenium:selenium-server:2.45.0"
+    compile "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+    compile "org.seleniumhq.selenium:selenium-server:${seleniumVersion}"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
 }

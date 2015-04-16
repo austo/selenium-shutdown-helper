@@ -3,6 +3,7 @@
 .idea/
 build/
 bin/
+gradle/
 *.iml
 *.ipr
 *.iws
