@@ -3,10 +3,12 @@
 .idea/
 build/
 bin/
+deploy/
 gradle/
 *.iml
 *.ipr
 *.iws
 *.log
 *.tar
+*.tar.gz
 *.pid

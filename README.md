@@ -15,3 +15,6 @@ The options passed above are the defaults; this is equivalent to running `./run_
 
 ####Help####
 Run `./run_hub.sh -h` or `run_node.sh -h` to see available options and their defaults.
+
+####Deploy####
+Run `./gradlew deploy` to build build a deployment archive `deploy.tar.gz` from the latest sources.

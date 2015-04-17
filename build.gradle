@@ -21,6 +21,12 @@ task copyJar(type: Copy) {
     dependsOn('build')
 }
 
+task deploy(type: Exec) {
+    workingDir '.'
+    commandLine './package.sh'
+    dependsOn('copyJar')
+}
+
 task copyJarToDockerTests(type: Copy) {
     from "bin/${jar.archiveName}"
     into('../selenium-docker-tests')
