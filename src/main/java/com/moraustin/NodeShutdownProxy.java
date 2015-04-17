@@ -97,8 +97,8 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
     }
 
     /**
-     * This class is used to poll continuously to decide if the current node can be cleaned up. If it can be cleaned up,
-     * this class helps in un-hooking the node from the grid and also issuing a shutdown request to the node.
+     * Polls continuously to decide if the current node can be cleaned up. If so,
+     * releases node from the grid and issues a shutdown request to the node.
      */
     static class NodePoller extends Thread {
         private NodeShutdownProxy proxy = null;

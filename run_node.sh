@@ -1,13 +1,37 @@
 #!/usr/bin/env bash
 
-SELENIUM_BINARY='selenium-server-standalone-2.45.0.jar'
+SELENIUM_VERSION='2.45.0'
 HELPER_BINARY='selenium-shutdown-helper-1.0.jar'
-CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
 MAIN_CLASS='org.openqa.grid.selenium.GridLauncher'
 HUB_REG_URL='http://localhost:4444/grid/register'
 SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
 NODE_CONFIG='config/nodeConfig.json'
 SLEEP_INTERVAL='10'
+
+
+function usage() {
+	echo "${1} usage:
+	-c: node config file
+	-v: selenium standalone jar version
+	-u: selenium hub registration url
+	-h: show this message and exit
+	"
+}
+
+while getopts c:u:v:h opt
+do
+	case ${opt} in
+		c) NODE_CONFIG="${OPTARG}";;
+		u) HUB_REG_URL="${OPTARG}";;
+		v) SELENIUM_VERSION="${OPTARG}";;
+		h) usage ${0}; exit;;
+		\?) usage ${0}; exit 1;;
+	esac
+done
+
+SELENIUM_BINARY="selenium-server-standalone-${SELENIUM_VERSION}.jar"
+CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
+
 
 SHOULD_RUN=true
 
