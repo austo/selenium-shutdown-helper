@@ -133,16 +133,10 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
                 HttpURLConnection connection = (HttpURLConnection) shutdownUrl.openConnection();
                 connection.setRequestMethod("POST");
                 int responseCode = connection.getResponseCode();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder builder = new StringBuilder();
-
-                while ((inputLine = reader.readLine()) != null) {
-                    builder.append(inputLine);
-                }
-                reader.close();
-                logger.info(String.format("received %d response from node: %s\n", responseCode, builder.toString()));
-
+                logger.info(String.format(
+                        "received %d response from node: %s\n",
+                        responseCode,
+                        HttpUtils.readResponse(connection)));
             } catch (IOException e) {
                 logger.log(Level.SEVERE, e.getMessage(), e);
                 return;
