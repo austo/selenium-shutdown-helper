@@ -1,0 +1,16 @@
+{
+  "capabilities": [{
+    "browserName": "firefox",
+    "maxInstances": 50,
+    "seleniumProtocol": "WebDriver",
+    "platform": "LINUX"
+  }],
+  "configuration": {
+    "proxy": "com.moraustin.NodeShutdownProxy",
+    "maxSession": 50,
+    "port": 5555,
+    "register": true,
+    "registerCycle": 5000,
+    "hubPort": 4444
+  }
+}

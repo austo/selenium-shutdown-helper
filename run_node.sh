@@ -7,6 +7,7 @@ HUB_REG_URL='http://localhost:4444/grid/register'
 SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
 NODE_CONFIG='config/nodeConfig.json'
 SLEEP_INTERVAL='10'
+XVFB_CMD=''
 
 
 function usage() {
@@ -32,6 +33,9 @@ done
 SELENIUM_BINARY="selenium-server-standalone-${SELENIUM_VERSION}.jar"
 CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
 
+if [[ $(uname) == 'Linux' ]]; then
+	XVFB_CMD='xvfb-run'
+fi
 
 SHOULD_RUN=true
 
@@ -44,7 +48,7 @@ kill_node() {
 trap kill_node TERM INT
 
 while ${SHOULD_RUN}; do
-	java -cp ${CLASSPATH} ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
+	${XVFB_CMD} java -cp ${CLASSPATH} ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
 	wait
 	sleep ${SLEEP_INTERVAL}
 done
