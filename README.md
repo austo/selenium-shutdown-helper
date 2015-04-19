@@ -3,7 +3,7 @@
 $ ./run_hub.sh -p src/main/resources/com/moraustin/NodeShutdownProxy.properties -v 2.45.0
 ```
 
-The options passed abover are the defaults; this is equivalent to running `./run_hub.sh`
+The options passed above are the defaults; this is equivalent to running `./run_hub.sh`
 
 ####Node:####
 ```
