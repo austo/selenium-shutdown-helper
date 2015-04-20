@@ -8,7 +8,7 @@ SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
 NODE_CONFIG='config/nodeConfig.json'
 SLEEP_INTERVAL='10'
 XVFB_CMD=''
-
+LOG_LEVEL='INFO'
 
 function usage() {
 	echo "${1} usage:
@@ -19,10 +19,11 @@ function usage() {
 	"
 }
 
-while getopts c:u:v:h opt
+while getopts c:l:u:v:h opt
 do
 	case ${opt} in
 		c) NODE_CONFIG="${OPTARG}";;
+		l) LOG_LEVEL="${OPTARG}";;
 		u) HUB_REG_URL="${OPTARG}";;
 		v) SELENIUM_VERSION="${OPTARG}";;
 		h) usage ${0}; exit;;
@@ -48,7 +49,7 @@ kill_node() {
 trap kill_node TERM INT
 
 while ${SHOULD_RUN}; do
-	${XVFB_CMD} java -cp ${CLASSPATH} ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
+	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
 	wait
 	sleep ${SLEEP_INTERVAL}
 done
