@@ -10,6 +10,24 @@ SLEEP_INTERVAL='10'
 XVFB_CMD=''
 LOG_LEVEL='INFO'
 
+function getPwd() {
+	SOURCE="${BASH_SOURCE[0]}"
+	# resolve $SOURCE until the file is no longer a symlink
+	while [ -h "${SOURCE}" ]; do
+		DIR="$(cd -P "$(dirname "${SOURCE}")" && pwd)"
+		SOURCE="$(readlink "${SOURCE}")"
+		# if $SOURCE was a relative symlink, we need to resolve it
+		# relative to the path where the symlink file was located
+		[[ ${SOURCE} != /* ]] && SOURCE="${DIR}/${SOURCE}"
+	done
+	echo "$(cd -P "$(dirname "${SOURCE}")" && pwd)"
+}
+
+# set working directory to script directory to support relative classpaths
+cd $(getPwd)
+
+printf 'Working directory is %s\n' $(pwd)
+
 function usage() {
 	echo "${1} usage:
 	-c: node config file (default: ${NODE_CONFIG})
