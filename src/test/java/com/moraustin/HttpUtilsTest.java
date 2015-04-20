@@ -13,11 +13,19 @@ public class HttpUtilsTest {
 
 
     @Test
-    public void ShouldReadInputStream() throws IOException {
+    public void ShouldReadUrlConnectionInputStream() throws IOException {
         final String body = "I am a robot";
         HttpURLConnectionSpy spy = new HttpURLConnectionSpy(body);
         assertTrue(HttpUtils.readResponse(spy).equals(body));
         assertEquals(1, spy.inputStreamCallCount);
+    }
+
+    @Test
+    public void ShouldReadNakedInputStream() throws IOException {
+        final String body = "let's get serious";
+        InputStream stream = new ByteArrayInputStream(body.getBytes());
+        String result = HttpUtils.readInputStream(stream);
+        assertTrue(body.equals(result));
     }
 
 

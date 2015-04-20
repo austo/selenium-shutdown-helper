@@ -1,9 +1,8 @@
 package com.moraustin;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 
 public class HttpUtils {
 
@@ -21,5 +20,15 @@ public class HttpUtils {
         }
         reader.close();
         return builder.toString();
+    }
+
+    public static String readInputStream(InputStream stream) throws IOException {
+        byte[] buf = new byte[100];
+        int read;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while((read = stream.read(buf)) != -1) {
+            out.write(buf, 0, read);
+        }
+        return new String(out.toByteArray(), Charset.forName("UTF-8"));
     }
 }
