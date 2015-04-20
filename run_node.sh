@@ -49,7 +49,10 @@ kill_node() {
 trap kill_node TERM INT
 
 while ${SHOULD_RUN}; do
-	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} -role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
+	echo 'starting node'
+	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
+		-role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
 	wait
+	echo 'node has stopped'
 	sleep ${SLEEP_INTERVAL}
 done
