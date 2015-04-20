@@ -4,6 +4,7 @@
 build/
 bin/
 deploy/
+ssi-selenium/
 gradle/
 *.iml
 *.ipr
