@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-DEPLOY_ARCHIVE='deploy.tar.gz'
 DEPLOY_DIR='ssi-selenium'
+DEPLOY_ARCHIVE="${DEPLOY_DIR}.tar.gz"
 
 printf "Creating deployment archive at $(tput bold)$(tput setaf 2)%s$(tput sgr0)\n" "${DEPLOY_ARCHIVE}"
 rm -f ${DEPLOY_ARCHIVE}

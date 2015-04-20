@@ -31,6 +31,7 @@ printf 'Working directory is %s\n' $(pwd)
 function usage() {
 	echo "${1} usage:
 	-c: node config file (default: ${NODE_CONFIG})
+	-l: logging level (default: ${LOG_LEVEL})
 	-v: selenium standalone jar version (default: ${SELENIUM_VERSION})
 	-u: selenium hub registration url (default: ${HUB_REG_URL})
 	-h: show this message and exit
