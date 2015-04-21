@@ -16,6 +16,7 @@ public class NodeShutdownServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(NodeShutdownServlet.class.getName());
 
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // TODO: get status of node
         super.doGet(req, resp);
