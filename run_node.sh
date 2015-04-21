@@ -9,6 +9,7 @@ NODE_CONFIG='config/nodeConfig.json'
 SLEEP_INTERVAL='10'
 XVFB_CMD=''
 LOG_LEVEL='INFO'
+RUN_ONCE=false
 
 function getPwd() {
 	SOURCE="${BASH_SOURCE[0]}"
@@ -38,11 +39,12 @@ function usage() {
 	"
 }
 
-while getopts c:l:u:v:h opt
+while getopts c:l:ou:v:h opt
 do
 	case ${opt} in
 		c) NODE_CONFIG="${OPTARG}";;
 		l) LOG_LEVEL="${OPTARG}";;
+		o) RUN_ONCE=true;;
 		u) HUB_REG_URL="${OPTARG}";;
 		v) SELENIUM_VERSION="${OPTARG}";;
 		h) usage ${0}; exit;;
@@ -67,11 +69,19 @@ kill_node() {
 
 trap kill_node TERM INT
 
-while ${SHOULD_RUN}; do
-	echo 'starting node'
+echo 'starting node'
+
+if ${RUN_ONCE}; then
+	echo 'only running once'
 	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
-		-role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
-	wait
-	echo 'node has stopped'
-	sleep ${SLEEP_INTERVAL}
-done
+		-role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG}
+	else
+		while ${SHOULD_RUN}; do
+			${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
+				-role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG} &
+			wait
+			sleep ${SLEEP_INTERVAL}
+		done
+fi
+
+echo 'node has stopped'

@@ -1,6 +1,7 @@
 package com.moraustin;
 
 import org.junit.Test;
+import org.openqa.grid.internal.Registry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,7 @@ public class StatusServletTest {
         when(req.getPathInfo()).thenReturn("/echo/hello");
         when(res.getWriter()).thenReturn(new PrintWriter(writer));
 
-        StatusServlet servlet = new StatusServlet();
+        StatusServlet servlet = new StatusServlet(mock(Registry.class));
         servlet.doGet(req, res);
 
         verify(res).setStatus(200);
