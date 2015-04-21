@@ -29,7 +29,7 @@ public class StatusServletTest {
         when(req.getPathInfo()).thenReturn("/echo/hello");
         when(res.getWriter()).thenReturn(new PrintWriter(writer));
 
-        StatusServlet servlet = new StatusServlet(mock(Registry.class));
+        StatusServlet servlet = new StatusServlet();
         servlet.doGet(req, res);
 
         verify(res).setStatus(200);

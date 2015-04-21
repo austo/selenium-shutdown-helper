@@ -5,6 +5,7 @@ HELPER_BINARY='selenium-shutdown-helper-1.0.jar'
 MAIN_CLASS='org.openqa.grid.selenium.GridLauncher'
 HUB_REG_URL='http://localhost:4444/grid/register'
 SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
+STATUS_SERVLET='com.moraustin.StatusServlet'
 NODE_CONFIG='config/nodeConfig.json'
 SLEEP_INTERVAL='10'
 XVFB_CMD=''
@@ -74,7 +75,7 @@ echo 'starting node'
 if ${RUN_ONCE}; then
 	echo 'only running once'
 	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
-		-role node -hub ${HUB_REG_URL} -servlets ${SHUTDOWN_SERVLET} -nodeConfig ${NODE_CONFIG}
+		-role node -hub ${HUB_REG_URL} -servlets "${SHUTDOWN_SERVLET},${STATUS_SERVLET}" -nodeConfig ${NODE_CONFIG}
 	else
 		while ${SHOULD_RUN}; do
 			${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \

@@ -9,6 +9,12 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes('buildDate': new Date().format("yyyy-MM-dd_HH-mm-ss"))
+    }
+}
+
 task rmJar(type: Delete) {
     println("deleting ${jar.archiveName}")
     delete("bin/${jar.archiveName}")

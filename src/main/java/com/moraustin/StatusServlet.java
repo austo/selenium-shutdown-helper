@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 
-public class StatusServlet extends RegistryBasedServlet {
+public class StatusServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(NodeShutdownServlet.class.getName());
 
@@ -23,10 +23,6 @@ public class StatusServlet extends RegistryBasedServlet {
     public static final String CONTENT_TYPE_XML_APPLICATION = "application/xml";
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
-    public StatusServlet(Registry registry) {
-        super(registry);
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -41,7 +37,7 @@ public class StatusServlet extends RegistryBasedServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-
+        res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
     @SuppressWarnings("unchecked")
@@ -74,8 +70,8 @@ public class StatusServlet extends RegistryBasedServlet {
 
     public enum Status {
         SUCCESS(HttpServletResponse.SC_OK, "The application is running.", "black"),
-        LOADING(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The application is loading.", "black"),//TODO make loading
-        ERROR(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error occurred connecting to the database.", "red");
+        LOADING(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "The application is initializing.", "black");
+
         private int responseCode;
         private String responseMessage;
         private String color;
@@ -109,15 +105,11 @@ public class StatusServlet extends RegistryBasedServlet {
 
                 html.append("<html>");
                 html.append("<head>");
-                html.append("<title>" + title + "</title>");
+                html.append("<title>").append(title).append("</title>");
                 html.append("</head>");
                 html.append("<body>");
-                html.append("<h4>" + title + "</h4>");
-                html.append("<p " + styles + ">" + status.getResponseMessage() + "</p>");
-//                if (getVersion) {
-//                    html.append("<h4>Version</h4>");
-//                    html.append("<p id=\"version\">" + WebAppVersion.getVersion() + "</p>");
-//                }
+                html.append("<h4>").append(title).append("</h4>");
+                html.append("<p ").append(styles).append(">").append(status.getResponseMessage()).append("</p>");
                 html.append("<h4>Hostname</h4>");
                 html.append("<p id=\"hostname\">").append(HostnameHelper.getHostname()).append("</p>");
                 html.append("</body>");
@@ -134,18 +126,11 @@ public class StatusServlet extends RegistryBasedServlet {
         JSON {
             @Override
             public String getStatusPage(String appName, Status status, boolean getVersion) {
-                StringBuilder json = new StringBuilder();
-
-                json.append("{");
-                json.append("\"applicationName\": \"").append(appName).append("\",");
-                json.append("\"statusMessage\": \"").append(status.getResponseMessage()).append("\",");
-//                if (getVersion) {
-//                    json.append("\"version\": \"").append(WebAppVersion.getVersion()).append("\",");
-//                }
-                json.append("\"hostname\": \"").append(HostnameHelper.getHostname()).append("\"");
-                json.append("}");
-
-                return json.toString();
+                return "{" +
+                        "\"applicationName\": \"" + appName + "\"," +
+                        "\"statusMessage\": \"" + status.getResponseMessage() + "\"," +
+                        "\"hostname\": \"" + HostnameHelper.getHostname() + "\"" +
+                        "}";
             }
 
             @Override
@@ -157,18 +142,11 @@ public class StatusServlet extends RegistryBasedServlet {
         XML {
             @Override
             public String getStatusPage(String appName, Status status, boolean getVersion) {
-                StringBuilder xml = new StringBuilder();
-
-                xml.append("<status>");
-                xml.append("<applicationName>" + appName + "</applicationName>");
-                xml.append("<statusMessage>" + status.getResponseMessage() + "</statusMessage>");
-//                if (getVersion) {
-//                    xml.append("<version>" + WebAppVersion.getVersion() + "</version>");
-//                }
-                xml.append("<hostname>").append(HostnameHelper.getHostname()).append("</hostname>");
-                xml.append("</status>");
-
-                return xml.toString();
+                return "<status>" +
+                        "<applicationName>" + appName + "</applicationName>" +
+                        "<statusMessage>" + status.getResponseMessage() + "</statusMessage>" +
+                        "<hostname>" + HostnameHelper.getHostname() + "</hostname>" +
+                        "</status>";
             }
 
             @Override
