@@ -9,6 +9,7 @@ repositories {
     mavenCentral()
 }
 
+// TODO: tag with ssi version number/build date, build in teamcity
 //jar {
 //    manifest {
 //        attributes('buildDate': new Date().format("yyyy-MM-dd_HH-mm-ss"))
