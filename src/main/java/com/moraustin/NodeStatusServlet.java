@@ -1,8 +1,5 @@
 package com.moraustin;
 
-import org.openqa.grid.internal.Registry;
-import org.openqa.grid.web.servlet.RegistryBasedServlet;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +10,7 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 
-public class StatusServlet extends HttpServlet {
+public class NodeStatusServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(NodeShutdownServlet.class.getName());
 
@@ -24,15 +21,22 @@ public class StatusServlet extends HttpServlet {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
+    static final String STATUS_MESSAGE = "The application is running.";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        res.setContentType(getContentType(req));
+        MediaType mediaType = getMediaType(req);
+        res.setContentType(mediaType.getContentType());
         res.setStatus(200);
         res.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
         String pathInfo = req.getPathInfo();
-        if (pathInfo.startsWith("/echo")) {
+
+        // Having a little fun
+        if (pathInfo.startsWith("/echo/")) {
             res.getWriter().write(pathInfo.substring(pathInfo.lastIndexOf('/') + 1));
+            return;
         }
+        res.getWriter().write(mediaType.getStatusPage(getAppName()));
     }
 
     @Override
@@ -40,14 +44,9 @@ public class StatusServlet extends HttpServlet {
         res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
-    @SuppressWarnings("unchecked")
-    private String getContentType(HttpServletRequest req) {
-        ArrayList acceptHeaders = Collections.list(req.getHeaders("Accept"));
-        if (acceptHeaders.isEmpty()) {
-            return CONTENT_TYPE_HTML;
-        }
-        String acceptHeader = (String) acceptHeaders.get(0);
-        return acceptHeader.split(",")[0];
+    String getAppName() {
+        // TODO: get from MANIFEST.MF
+        return "selenium-shutdown-helper";
     }
 
     @SuppressWarnings("unchecked")
@@ -68,54 +67,13 @@ public class StatusServlet extends HttpServlet {
         return MediaType.HTML;
     }
 
-    public enum Status {
-        SUCCESS(HttpServletResponse.SC_OK, "The application is running.", "black"),
-        LOADING(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "The application is initializing.", "black");
-
-        private int responseCode;
-        private String responseMessage;
-        private String color;
-
-        private Status(int responseCode, String responseMessage, String color) {
-            this.responseCode = responseCode;
-            this.responseMessage = responseMessage;
-            this.color = color;
-        }
-
-        public int getResponseCode() {
-            return responseCode;
-        }
-
-        public String getResponseMessage() {
-            return responseMessage;
-        }
-
-        public String getColor() {
-            return color;
-        }
-    }
-
     protected enum MediaType {
         HTML {
             @Override
-            public String getStatusPage(String appName, Status status, boolean getVersion) {
-                StringBuilder html = new StringBuilder();
-                String title = appName + " Status";
-                String styles = "style=\"color:" + status.getColor() + ";\"";
+            public String getStatusPage(String appName) {
+                String styles = "style=\"color: black;\"";
 
-                html.append("<html>");
-                html.append("<head>");
-                html.append("<title>").append(title).append("</title>");
-                html.append("</head>");
-                html.append("<body>");
-                html.append("<h4>").append(title).append("</h4>");
-                html.append("<p ").append(styles).append(">").append(status.getResponseMessage()).append("</p>");
-                html.append("<h4>Hostname</h4>");
-                html.append("<p id=\"hostname\">").append(HostnameHelper.getHostname()).append("</p>");
-                html.append("</body>");
-                html.append("</html>");
-
-                return html.toString();
+                return "<html>" + "<head>" + "<title>" + appName + " Status</title></head><body><h4>" + appName + " Status</h4>" + "<p " + styles + ">" + STATUS_MESSAGE + "</p>" + "<h4>Hostname</h4>" + "<p id=\"hostname\">" + HostnameHelper.getHostname() + "</p>" + "</body>" + "</html>";
             }
 
             @Override
@@ -125,10 +83,10 @@ public class StatusServlet extends HttpServlet {
         },
         JSON {
             @Override
-            public String getStatusPage(String appName, Status status, boolean getVersion) {
+            public String getStatusPage(String appName) {
                 return "{" +
                         "\"applicationName\": \"" + appName + "\"," +
-                        "\"statusMessage\": \"" + status.getResponseMessage() + "\"," +
+                        "\"statusMessage\": \"" + STATUS_MESSAGE + "\"," +
                         "\"hostname\": \"" + HostnameHelper.getHostname() + "\"" +
                         "}";
             }
@@ -141,10 +99,10 @@ public class StatusServlet extends HttpServlet {
         },
         XML {
             @Override
-            public String getStatusPage(String appName, Status status, boolean getVersion) {
+            public String getStatusPage(String appName) {
                 return "<status>" +
                         "<applicationName>" + appName + "</applicationName>" +
-                        "<statusMessage>" + status.getResponseMessage() + "</statusMessage>" +
+                        "<statusMessage>" + STATUS_MESSAGE + "</statusMessage>" +
                         "<hostname>" + HostnameHelper.getHostname() + "</hostname>" +
                         "</status>";
             }
@@ -156,7 +114,7 @@ public class StatusServlet extends HttpServlet {
 
         };
 
-        public abstract String getStatusPage(String appName, Status status, boolean getVersion);
+        public abstract String getStatusPage(String appName);
 
         public abstract String getContentType();
     }
