@@ -6,6 +6,10 @@ MAIN_CLASS='org.openqa.grid.selenium.GridLauncher'
 PROPERTIES_ARG=''
 PROP_NAME='-DproxyPropertiesPath'
 DEFAULT_PROPS='src/main/resources/com/moraustin/NodeShutdownProxy.properties'
+STATUS_SERVLET='com.moraustin.HubStatusServlet'
+JVM_ARGS=''
+REMOTE_DEBUG_ARGS='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+
 
 function getPwd() {
 	SOURCE="${BASH_SOURCE[0]}"
@@ -33,9 +37,10 @@ function usage() {
 	"
 }
 
-while getopts p:v:h opt
+while getopts dp:v:h opt
 do
 	case ${opt} in
+		d) JVM_ARGS="${REMOTE_DEBUG_ARGS}"; echo 'debug mode: debugger listening on port 5005';;
 		p) PROPERTIES_ARG="${PROP_NAME}=${OPTARG}";;
 		v) SELENIUM_VERSION="${OPTARG}";;
 		h) usage ${0}; exit;;
@@ -52,4 +57,4 @@ echo "${PROPERTIES_ARG}"
 SELENIUM_BINARY="selenium-server-standalone-${SELENIUM_VERSION}.jar"
 CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
 
-java ${PROPERTIES_ARG} -cp ${CLASSPATH} ${MAIN_CLASS} -role hub
+java ${JVM_ARGS} ${PROPERTIES_ARG} -cp ${CLASSPATH} ${MAIN_CLASS} -role hub -servlets "${STATUS_SERVLET}"
