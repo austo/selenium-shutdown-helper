@@ -7,7 +7,6 @@
   "configuration": {
     "proxy": "com.moraustin.NodeShutdownProxy",
     "maxSession": 5,
-    "port": 5555,
     "register": true,
     "registerCycle": 5000,
     "hubPort": 4444

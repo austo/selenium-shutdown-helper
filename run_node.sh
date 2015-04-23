@@ -8,6 +8,7 @@ SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
 STATUS_SERVLET='com.moraustin.NodeStatusServlet'
 SERVLETS="${SHUTDOWN_SERVLET},${STATUS_SERVLET}"
 NODE_CONFIG='config/nodeConfig.json'
+NODE_PORT='-port 5555'
 SLEEP_INTERVAL='10'
 XVFB_CMD=''
 LOG_LEVEL='INFO'
@@ -41,12 +42,13 @@ function usage() {
 	"
 }
 
-while getopts c:l:ou:v:h opt
+while getopts c:l:op:u:v:h opt
 do
 	case ${opt} in
 		c) NODE_CONFIG="${OPTARG}";;
 		l) LOG_LEVEL="${OPTARG}";;
 		o) RUN_ONCE=true;;
+		p) NODE_PORT="-port ${OPTARG}";;
 		u) HUB_REG_URL="${OPTARG}";;
 		v) SELENIUM_VERSION="${OPTARG}";;
 		h) usage ${0}; exit;;
@@ -76,7 +78,7 @@ echo 'starting node'
 if ${RUN_ONCE}; then
 	echo 'only running once'
 	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
-		-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG}
+		-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} ${NODE_PORT}
 	else
 		while ${SHOULD_RUN}; do
 			${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
