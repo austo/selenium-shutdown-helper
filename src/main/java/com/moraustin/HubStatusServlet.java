@@ -56,7 +56,7 @@ public class HubStatusServlet extends RegistryBasedServlet {
                         .append(": ");
                 Object value = entry.getValue();
                 sb.append(value == null ? "null" : value.toString())
-                        .append(",\n");
+                        .append('\n');
             }
             sb.append("\n\n");
         }
