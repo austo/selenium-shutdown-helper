@@ -17,7 +17,8 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
 
     private static final Logger logger = Logger.getLogger(NodeShutdownProxy.class.getName());
 
-    private volatile int counter;
+    private volatile int remainingSessions;
+    private final int totalAllowedSessions;
     private NodePoller poller;
 
     public NodeShutdownProxy(RegistrationRequest request, Registry registry) throws IOException {
@@ -27,7 +28,8 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         logger.info("Remote host is " + this.getRemoteHost());
 
         Properties props = getProxyProperties();
-        counter = Integer.parseInt((String) props.get(Constants.UNIQUE_SESSION_COUNT));
+        totalAllowedSessions = Integer.parseInt((String) props.get(Constants.UNIQUE_SESSION_COUNT));
+        remainingSessions = totalAllowedSessions;
     }
 
     @Override
@@ -53,25 +55,33 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         logger.warning("Cannot forward any more tests to " + ip);
     }
 
+    public int getRemainingSessions() {
+        return remainingSessions;
+    }
+
+    public int getTotalAllowedSessions() {
+        return totalAllowedSessions;
+    }
+
     private synchronized boolean decrementedCounterIsNotZero() {
-        if (this.counter == 0) {
+        if (this.remainingSessions == 0) {
             return false;
         }
-        --this.counter;
+        --this.remainingSessions;
         return true;
     }
 
     private synchronized boolean canReleaseNode() {
-        final String ip = this.getRemoteHost().getHost();
+        final String ip = this.getRemoteHost().toString().replaceAll("^.*?://", "");
         if (this.isBusy()) {
             logger.info(ip + " is busy and cannot be released");
             return false;
         }
-        if (this.counter == 0) {
+        if (this.remainingSessions == 0) {
             logger.info(ip + " has no sessions remaining and can be released");
             return true;
         }
-        logger.info(ip + " has " + counter + " sessions remaining and will not be released");
+        logger.info(ip + " has " + remainingSessions + " sessions remaining and will not be released");
         return false;
     }
 

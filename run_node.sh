@@ -8,7 +8,7 @@ SHUTDOWN_SERVLET='com.moraustin.NodeShutdownServlet'
 STATUS_SERVLET='com.moraustin.NodeStatusServlet'
 SERVLETS="${SHUTDOWN_SERVLET},${STATUS_SERVLET}"
 NODE_CONFIG='config/nodeConfig.json'
-NODE_PORT='-port 5555'
+NODE_PORT='5555'
 SLEEP_INTERVAL='10'
 XVFB_CMD=''
 LOG_LEVEL='INFO'
@@ -36,6 +36,8 @@ function usage() {
 	echo "${1} usage:
 	-c: node config file (default: ${NODE_CONFIG})
 	-l: logging level (default: ${LOG_LEVEL})
+	-o: run once (do not respawn)
+	-p: node port (default: ${NODE_PORT})
 	-v: selenium standalone jar version (default: ${SELENIUM_VERSION})
 	-u: selenium hub registration url (default: ${HUB_REG_URL})
 	-h: show this message and exit
@@ -48,7 +50,7 @@ do
 		c) NODE_CONFIG="${OPTARG}";;
 		l) LOG_LEVEL="${OPTARG}";;
 		o) RUN_ONCE=true;;
-		p) NODE_PORT="-port ${OPTARG}";;
+		p) NODE_PORT="${OPTARG}";;
 		u) HUB_REG_URL="${OPTARG}";;
 		v) SELENIUM_VERSION="${OPTARG}";;
 		h) usage ${0}; exit;;
@@ -78,11 +80,11 @@ echo 'starting node'
 if ${RUN_ONCE}; then
 	echo 'only running once'
 	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
-		-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} ${NODE_PORT}
+		-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} -port ${NODE_PORT}
 	else
 		while ${SHOULD_RUN}; do
 			${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
-				-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} &
+				-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} -port ${NODE_PORT} &
 			wait
 			sleep ${SLEEP_INTERVAL}
 		done
