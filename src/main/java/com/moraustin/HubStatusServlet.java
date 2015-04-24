@@ -22,8 +22,12 @@ public class HubStatusServlet extends RegistryBasedServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        res.setContentType("text/plain");
         res.setStatus(HttpServletResponse.SC_OK);
+        if (req.getPathInfo().equals("/capacity")) {
+            sendCapacityResponse(res);
+            return;
+        }
+        res.setContentType("text/plain");
         res.getWriter().write(getReport());
     }
 
@@ -33,8 +37,10 @@ public class HubStatusServlet extends RegistryBasedServlet {
     }
 
     private String getReport() {
-        ProxySet proxySet = getRegistry().getAllProxies();
         StringBuilder sb = new StringBuilder();
+        sb.append("Status for hub: ").append(this.getRegistry().getHub().getUrl()).append("\n\n");
+
+        ProxySet proxySet = getRegistry().getAllProxies();
         for (RemoteProxy proxy : proxySet) {
             sb.append("Node host URL: ")
                     .append(proxy.getRemoteHost().toString()).append('\n')
@@ -48,6 +54,7 @@ public class HubStatusServlet extends RegistryBasedServlet {
                 sb.append("Remaining sessions: ").append(shutdownProxy.getRemainingSessions()).append('\n');
             }
 
+            sb.append("Max concurrent sessions: ").append(proxy.getMaxNumberOfConcurrentTestSessions()).append('\n');
             sb.append("\nConfiguration:\n");
 
             for (Map.Entry<String, Object> entry : proxy.getConfig().entrySet()) {
@@ -63,4 +70,17 @@ public class HubStatusServlet extends RegistryBasedServlet {
         return sb.toString();
     }
 
+    private void sendCapacityResponse(HttpServletResponse res) throws IOException {
+        res.setContentType("application/json");
+        res.setCharacterEncoding("UTF-8");
+        res.getWriter().write(String.format("{ \"maxConcurrentSessions\": %d }", calculateCapacity()));
+    }
+
+    private int calculateCapacity() {
+        int counter = 0;
+        for (RemoteProxy p : getRegistry().getAllProxies()) {
+            counter += p.getMaxNumberOfConcurrentTestSessions();
+        }
+        return counter;
+    }
 }
