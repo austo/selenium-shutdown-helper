@@ -13,3 +13,4 @@ gradle/
 *.tar
 *.tar.gz
 *.pid
+testShutdownProxy.properties

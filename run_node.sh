@@ -73,7 +73,14 @@ kill_node() {
 	wait
 }
 
+graceful_exit() {
+	echo 'recieved USR1 signal, will not restart node after unique sessions are depleted'
+	SHOULD_RUN=false
+	wait
+}
+
 trap kill_node TERM INT
+trap graceful_exit USR1
 
 echo 'starting node'
 
