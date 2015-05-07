@@ -1,5 +1,6 @@
 package com.moraustin;
 
+import com.moraustin.util.HttpUtils;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.exception.RemoteUnregisterException;
 import org.openqa.grid.internal.Registry;

@@ -1,5 +1,6 @@
 package com.moraustin;
 
+import com.moraustin.util.UrlComparator;
 import org.openqa.grid.internal.ProxySet;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
@@ -9,7 +10,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
+import java.net.URL;
+import java.util.*;
 
 public class HubStatusServlet extends RegistryBasedServlet {
     public HubStatusServlet(Registry registry) {
@@ -40,8 +42,9 @@ public class HubStatusServlet extends RegistryBasedServlet {
         StringBuilder sb = new StringBuilder();
         sb.append("Status for hub: ").append(this.getRegistry().getHub().getUrl()).append("\n\n");
 
-        ProxySet proxySet = getRegistry().getAllProxies();
-        for (RemoteProxy proxy : proxySet) {
+        List<RemoteProxy> proxies = buildSortedProxyList();
+
+        for (RemoteProxy proxy : proxies) {
             sb.append("Node host URL: ")
                     .append(proxy.getRemoteHost().toString()).append('\n')
                     .append("Proxy type: ")
@@ -82,5 +85,22 @@ public class HubStatusServlet extends RegistryBasedServlet {
             counter += p.getMaxNumberOfConcurrentTestSessions();
         }
         return counter;
+    }
+
+    private List<RemoteProxy> buildSortedProxyList() {
+        ProxySet proxySet = getRegistry().getAllProxies();
+        List<RemoteProxy> proxies = new LinkedList<>();
+        for (RemoteProxy p : proxySet) {
+            proxies.add(p);
+        }
+
+        final Comparator<URL> comparator = new UrlComparator();
+        Collections.sort(proxies, new Comparator<RemoteProxy>() {
+            @Override
+            public int compare(RemoteProxy first, RemoteProxy second) {
+                return comparator.compare(first.getRemoteHost(), second.getRemoteHost());
+            }
+        });
+        return proxies;
     }
 }

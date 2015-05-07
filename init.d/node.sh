@@ -11,3 +11,5 @@ for p in ${PORTS}; do
 	/home/selenium/selenium/ssi-selenium/run_node.sh -c config/ssiMultiNodeConfig.json -l WARNING \
 		-p ${p} -u "http://${HUB_HOST}:4444/grid/register" >> /home/selenium/logger/logs/filtered-${p}.log &
 done
+
+wait

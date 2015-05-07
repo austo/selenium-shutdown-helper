@@ -1,5 +1,6 @@
-package com.moraustin;
+package com.moraustin.util;
 
+import com.moraustin.util.HttpUtils;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
