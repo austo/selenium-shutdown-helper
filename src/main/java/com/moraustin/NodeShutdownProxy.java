@@ -2,13 +2,15 @@ package com.moraustin;
 
 import com.moraustin.util.HttpUtils;
 import org.openqa.grid.common.RegistrationRequest;
-import org.openqa.grid.common.exception.RemoteUnregisterException;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
@@ -161,8 +163,8 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             while (true) {
                 try {
                     if (proxy.canReleaseNode()) {
-                        proxy.teardown();
                         shutdownNode();
+                        proxy.teardown();
                         logger.info("Node " + proxy + " has been released successfully from the hub");
                         return;
                     }
