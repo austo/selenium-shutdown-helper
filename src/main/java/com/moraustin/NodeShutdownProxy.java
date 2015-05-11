@@ -68,7 +68,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             return null;
         }
 
-        // don't accept the new session request if we have exceed our session budget
+        // don't accept the new session request if we've exceeded our session budget
         if (decrementedCounterHasSessionRemaining()) {
             // any slot left at all?
             if (getTotalUsed() >= getMaxNumberOfConcurrentTestSessions()) {
@@ -83,8 +83,9 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
                     return session;
                 }
             }
+            logger.warning("Node " + this + " has no test slots remaining");
         } else {
-            logger.warning("Node " + this + " cannot create any more sessions before refresh.");
+            logger.warning("Node " + this + " cannot create any more sessions before refresh");
         }
         return null;
     }
