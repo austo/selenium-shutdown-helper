@@ -68,6 +68,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             return null;
         }
 
+        // don't accept the new session request if we have exceed our session budget
         if (decrementedCounterHasSessionRemaining()) {
             // any slot left at all?
             if (getTotalUsed() >= getMaxNumberOfConcurrentTestSessions()) {
@@ -104,17 +105,6 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         return true;
     }
 
-    private int decrementCounter() {
-        if (this.remainingSessions == 0) {
-            return 0;
-        }
-        return --this.remainingSessions;
-    }
-
-    private synchronized boolean counterIsNotZero() {
-        return this.remainingSessions > 0;
-    }
-
     private synchronized boolean canReleaseNode() {
         if (this.isBusy()) {
             logger.info("Node " + this + " is busy and cannot be released");
@@ -147,6 +137,11 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         props.load(stream);
         stream.close();
         return props;
+    }
+
+    @Override
+    public String toString() {
+        return "host: " + getRemoteHost();
     }
 
     /**
@@ -196,10 +191,5 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             }
             logger.info("Node " + this + " has shut down successfully");
         }
-    }
-
-    @Override
-    public String toString() {
-        return "host: " + getRemoteHost();
     }
 }
