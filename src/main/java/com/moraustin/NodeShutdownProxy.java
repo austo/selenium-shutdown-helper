@@ -5,11 +5,13 @@ import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.exception.RemoteUnregisterException;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSession;
+import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +26,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
 
     public NodeShutdownProxy(RegistrationRequest request, Registry registry) throws IOException {
         super(request, registry);
-        logger.info("New proxy instantiated for " + getRemoteHost().getHost());
+        logger.info("New proxy instantiated for " + this);
         logger.info("Attaching node " + this.getId());
         logger.info("Remote host is " + this.getRemoteHost());
 
@@ -48,12 +50,42 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
 
     @Override
     public void beforeSession(TestSession session) {
-        String ip = getRemoteHost().getHost();
-        if (decrementedCounterIsNotZero()) {
+        synchronized (this) {
+            if (this.remainingSessions == 0) {
+                logger.warning("Cannot forward any more tests to node " + this);
+                return;
+            }
             super.beforeSession(session);
-            return;
         }
-        logger.warning("Cannot forward any more tests to " + ip);
+    }
+
+    @Override
+    public TestSession getNewSession(Map<String, Object> requestedCapability) {
+        logger.info("Trying to create a new session on node " + this);
+
+        if (!hasCapability(requestedCapability)) {
+            logger.info("Node " + this + " has no matching capability");
+            return null;
+        }
+
+        if (decrementedCounterHasSessionRemaining()) {
+            // any slot left at all?
+            if (getTotalUsed() >= getMaxNumberOfConcurrentTestSessions()) {
+                logger.info("Node " + this + " has no free slots");
+                return null;
+            }
+            // any slot left for the given app ?
+            for (TestSlot testslot : getTestSlots()) {
+                TestSession session = testslot.getNewSession(requestedCapability);
+
+                if (session != null) {
+                    return session;
+                }
+            }
+        } else {
+            logger.warning("Node " + this + " cannot create any more sessions before refresh.");
+        }
+        return null;
     }
 
     public int getRemainingSessions() {
@@ -64,7 +96,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         return totalAllowedSessions;
     }
 
-    private synchronized boolean decrementedCounterIsNotZero() {
+    private synchronized boolean decrementedCounterHasSessionRemaining() {
         if (this.remainingSessions == 0) {
             return false;
         }
@@ -72,17 +104,27 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
         return true;
     }
 
+    private int decrementCounter() {
+        if (this.remainingSessions == 0) {
+            return 0;
+        }
+        return --this.remainingSessions;
+    }
+
+    private synchronized boolean counterIsNotZero() {
+        return this.remainingSessions > 0;
+    }
+
     private synchronized boolean canReleaseNode() {
-        final String ip = this.getRemoteHost().toString().replaceAll("^.*?://", "");
         if (this.isBusy()) {
-            logger.info(ip + " is busy and cannot be released");
+            logger.info("Node " + this + " is busy and cannot be released");
             return false;
         }
         if (this.remainingSessions == 0) {
-            logger.info(ip + " has no sessions remaining and can be released");
+            logger.info("Node " + this + " has no sessions remaining and can be released");
             return true;
         }
-        logger.info(ip + " has " + remainingSessions + " sessions remaining and will not be released");
+        logger.info("Node " + this + " has " + remainingSessions + " sessions remaining and will not be released");
         return false;
     }
 
@@ -124,7 +166,7 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
                 try {
                     if (proxy.canReleaseNode()) {
                         shutdownNode();
-                        logger.info(proxy.getRemoteHost().getHost() + " has been released successfully from the hub");
+                        logger.info("Node " + proxy + " has been released successfully from the hub");
                         Thread.sleep(Constants.NODE_SHUTDOWN_INTERVAL);
                         proxy.addNewEvent(new RemoteUnregisterException(String.format("taking proxy %s offline", this.getId())));
                         return;
@@ -152,7 +194,12 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
                 logger.log(Level.SEVERE, e.getMessage(), e);
                 return;
             }
-            logger.info("Node " + proxy.getRemoteHost().getHost() + " has shut down successfully");
+            logger.info("Node " + this + " has shut down successfully");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "host: " + getRemoteHost();
     }
 }

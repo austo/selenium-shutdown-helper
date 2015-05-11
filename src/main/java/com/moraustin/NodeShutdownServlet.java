@@ -9,8 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A simple servlet which basically issues a System.exit() when invoked.
- * Needs to be injected into node (not grid) to terminate node JVM.
+ * A simple servlet which shuts down its own JVM when invoked.
+ * Needs to be injected into node (not hub) to terminate node's JVM.
  */
 public class NodeShutdownServlet extends HttpServlet {
 

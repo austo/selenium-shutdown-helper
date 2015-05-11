@@ -9,10 +9,12 @@ STATUS_SERVLET='com.moraustin.NodeStatusServlet'
 SERVLETS="${SHUTDOWN_SERVLET},${STATUS_SERVLET}"
 NODE_CONFIG='config/nodeConfig.json'
 NODE_PORT='5555'
-SLEEP_INTERVAL='10'
+SLEEP_INTERVAL='2'
 XVFB_CMD=''
 LOG_LEVEL='INFO'
 RUN_ONCE=false
+JVM_ARGS=''
+REMOTE_DEBUG_ARGS='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
 
 function getPwd() {
 	SOURCE="${BASH_SOURCE[0]}"
@@ -35,6 +37,7 @@ printf 'Working directory is %s\n' $(pwd)
 function usage() {
 	echo "${1} usage:
 	-c: node config file (default: ${NODE_CONFIG})
+	-d: expose debug information on port 5005
 	-l: logging level (default: ${LOG_LEVEL})
 	-o: run once (do not respawn)
 	-p: node port (default: ${NODE_PORT})
@@ -44,10 +47,11 @@ function usage() {
 	"
 }
 
-while getopts c:l:op:u:v:h opt
+while getopts c:dl:op:u:v:h opt
 do
 	case ${opt} in
 		c) NODE_CONFIG="${OPTARG}";;
+		d) JVM_ARGS="${REMOTE_DEBUG_ARGS}"; echo 'debug mode: debugger listening on port 5005';;
 		l) LOG_LEVEL="${OPTARG}";;
 		o) RUN_ONCE=true;;
 		p) NODE_PORT="${OPTARG}";;
@@ -86,11 +90,11 @@ echo 'starting node'
 
 if ${RUN_ONCE}; then
 	echo 'only running once'
-	${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
+	${XVFB_CMD} java ${JVM_ARGS} -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
 		-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} -port ${NODE_PORT}
 	else
 		while ${SHOULD_RUN}; do
-			${XVFB_CMD} java -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
+			${XVFB_CMD} java ${JVM_ARGS} -Dselenium.LOGGER.level="${LOG_LEVEL}" -cp ${CLASSPATH} ${MAIN_CLASS} \
 				-role node -hub ${HUB_REG_URL} -servlets "${SERVLETS}" -nodeConfig ${NODE_CONFIG} -port ${NODE_PORT} &
 			wait
 			sleep ${SLEEP_INTERVAL}

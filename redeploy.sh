@@ -2,6 +2,8 @@
 
 # to be run from ctselenium01
 
+# for ip in $(cat ../prod_nodes.txt); do ssh -tt ${ip} '/etc/init.d/selenium-node stop'; done
+
 case ${1} in
 	dev)
 		HUB='use-seleniumdev01'

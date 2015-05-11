@@ -31,6 +31,7 @@ printf 'Working directory is %s\n' $(pwd)
 
 function usage() {
 	echo "${1} usage:
+	-d: expose debug information on port 5005
 	-p: proxy properties file (default: ${DEFAULT_PROPS})
 	-v: selenium standalone jar version (default: ${SELENIUM_VERSION})
 	-h: show this message and exit
@@ -57,4 +58,5 @@ echo "${PROPERTIES_ARG}"
 SELENIUM_BINARY="selenium-server-standalone-${SELENIUM_VERSION}.jar"
 CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
 
-java ${JVM_ARGS} ${PROPERTIES_ARG} -cp ${CLASSPATH} ${MAIN_CLASS} -role hub -servlets "${STATUS_SERVLET}"
+java ${JVM_ARGS} ${PROPERTIES_ARG} -cp ${CLASSPATH} ${MAIN_CLASS} -role hub -servlets "${STATUS_SERVLET}" \
+	-newSessionWaitTimeout 600000
