@@ -59,4 +59,4 @@ SELENIUM_BINARY="selenium-server-standalone-${SELENIUM_VERSION}.jar"
 CLASSPATH="bin/${SELENIUM_BINARY}:bin/${HELPER_BINARY}"
 
 java ${JVM_ARGS} ${PROPERTIES_ARG} -cp ${CLASSPATH} ${MAIN_CLASS} -role hub -servlets "${STATUS_SERVLET}" \
-	-newSessionWaitTimeout 600000
+	-newSessionWaitTimeout 600000 -throwOnCapabilityNotPresent false

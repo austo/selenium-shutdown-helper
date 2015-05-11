@@ -161,10 +161,9 @@ public class NodeShutdownProxy extends DefaultRemoteProxy {
             while (true) {
                 try {
                     if (proxy.canReleaseNode()) {
+                        proxy.teardown();
                         shutdownNode();
                         logger.info("Node " + proxy + " has been released successfully from the hub");
-                        Thread.sleep(Constants.NODE_SHUTDOWN_INTERVAL);
-                        proxy.addNewEvent(new RemoteUnregisterException(String.format("taking proxy %s offline", this.getId())));
                         return;
                     }
                     Thread.sleep(Constants.NODE_POLLING_INTERVAL);
