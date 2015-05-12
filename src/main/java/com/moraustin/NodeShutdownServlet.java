@@ -17,17 +17,18 @@ public class NodeShutdownServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(NodeShutdownServlet.class.getName());
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         // TODO: get status of node
-        super.doGet(req, resp);
+        res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        res.getWriter().print("vous n'avez pas la chance, mon vieux\n");
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         logger.info("received shutdown request");
-        resp.setStatus(200);
-        resp.setContentType("application/json");
-        resp.getWriter().print("{ \"message\": \"shutting down\" }");
+        res.setStatus(200);
+        res.setContentType("application/json");
+        res.getWriter().print("{ \"message\": \"shutting down\" }");
         new Terminator().start();
         logger.info("shutdown thread launched");
     }
